@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 
-import { buildDashboardFromConfig, servedUsersPanelData } from "../dashboard.ts";
+import { buildDashboardFromConfig } from "../dashboard.ts";
+import { orderUserRowsLikeListUsersSql } from "../db.ts";
 import { snapshot } from "../../../contracts/lib/mapper.ts";
 import { REPO_ROOT } from "../../../contracts/lib/paths.ts";
 import { rules } from "../../../contracts/rules.ts";
@@ -14,14 +15,16 @@ const POST_FIXTURE = "playground/fixtures/post.md";
 /**
  * Per-panel served-view (composition receipt):
  * | Panel | Served view |
- * | users | canonicalServeOrder ∘ rules.csv.normalize (non-identity — app chose name order) |
+ * | users | LIST_USERS_SQL on M1 seed (same path as GET /users at startup) |
  * | docs  | rules.md.normalize (identity — full typed { frontmatter, md }) |
  *
  * Claim: panels[i].data === servedView[panel.type](mapper(panel.source)).
  * Does not replace leaf two-clock arms; uses the same leaf shapes through dashboard.toml.
+ *
+ * Users panel is resolved at startup, not per request.
+ * POST /users does not update GET /dashboard (composition is static-config).
+ * Route-consistency follow-up: /dashboard ≟ leaf routes, if dynamic state becomes a claim.
  */
-
-type UserRow = { name: string; email: string; zip: string };
 
 let server: ReturnType<typeof Bun.spawn>;
 let base: string;
@@ -42,8 +45,12 @@ async function readStartupUrl(stream: ReadableStream<Uint8Array>): Promise<strin
 
 async function expectedPanelData(type: string, source: string): Promise<unknown> {
   if (type === "users" && source === "users.csv") {
-    const rows = rules.csv.normalize(await snapshot(USERS_FIXTURE)) as UserRow[];
-    return rules.csv.normalize(servedUsersPanelData(rows));
+    const rows = rules.csv.normalize(await snapshot(USERS_FIXTURE)) as {
+      name: string;
+      email: string;
+      zip: string;
+    }[];
+    return rules.csv.normalize(orderUserRowsLikeListUsersSql(rows));
   }
   if (type === "docs" && source === "post.md") {
     return rules.md.normalize(await snapshot(POST_FIXTURE));
@@ -102,5 +109,35 @@ describe("two-clock (dashboard composition)", () => {
     await expect(buildDashboardFromConfig(bad)).rejects.toThrow(
       /dashboard: missing source fixture playground\/fixtures\/nope\.csv/,
     );
+  });
+});
+
+describe("dashboard composition ≟ leaf routes", () => {
+  test("users panel data equals GET /users at startup", async () => {
+    const dash = (await (await fetch(`${base}/dashboard`)).json()) as {
+      panels: { type: string; data: unknown }[];
+    };
+    const usersBody = await (await fetch(`${base}/users`)).json();
+    const usersPanel = dash.panels.find((p) => p.type === "users");
+    expect(usersPanel?.data).toEqual(usersBody);
+  });
+
+  test("docs panel frontmatter equals GET /docs/hello/frontmatter", async () => {
+    const dash = (await (await fetch(`${base}/dashboard`)).json()) as {
+      panels: { type: string; data: { frontmatter: unknown; md: string } }[];
+    };
+    const fmRes = await fetch(`${base}/docs/hello/frontmatter`);
+    const { frontmatter } = (await fmRes.json()) as { frontmatter: unknown };
+    const docsPanel = dash.panels.find((p) => p.type === "docs");
+    expect(docsPanel?.data.frontmatter).toEqual(frontmatter);
+  });
+
+  test("docs panel md body equals GET /docs/hello text", async () => {
+    const dash = (await (await fetch(`${base}/dashboard`)).json()) as {
+      panels: { type: string; data: { frontmatter: unknown; md: string } }[];
+    };
+    const bodyText = await (await fetch(`${base}/docs/hello`)).text();
+    const docsPanel = dash.panels.find((p) => p.type === "docs");
+    expect(docsPanel?.data.md).toBe(bodyText);
   });
 });

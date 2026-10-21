@@ -53,7 +53,7 @@ Cross-cutting invariants (all milestones):
 
 ## Range — compositional parity
 
-- [x] **`dashboard.toml` composition** — `GET /dashboard`; `app-dashboard-composition.parity.test.ts` · `describe("two-clock (dashboard composition)")`. Claim: `panels[i].data === servedView[type](mapper(source))` — users: `servedUsersPanelData ∘ csv.normalize`; docs: full `{ frontmatter, md }` via `md.normalize`. Depth-1 refs only; missing fixture fails at startup. `dashboard-types.probe.ts`: `type` narrows to `"users" | "docs"` (verified `tsc --runExternalCode`).
+- [x] **`dashboard.toml` composition** — `GET /dashboard`; users panel via `usersServeRowsFromSeed()` / `LIST_USERS_SQL`; static at startup. `describe("dashboard composition ≟ leaf routes")` proves panel data matches `/users` and `/docs/hello*`. Depth-1 refs; `dashboard-types.probe.ts` union verified.
 
 ## Deferred / not planned
 

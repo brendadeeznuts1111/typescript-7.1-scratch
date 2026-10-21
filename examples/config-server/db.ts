@@ -35,6 +35,27 @@ export function listUsers(db: Database) {
   return db.query(LIST_USERS_SQL).all() as UserRow[];
 }
 
+/**
+ * In-memory sort matching LIST_USERS_SQL (name ASC, rowid ASC).
+ * Email tiebreak when names collide — CSV/dashboard panels have no rowid column.
+ * If LIST_USERS_SQL changes, update this and composition tests deliberately.
+ */
+export function orderUserRowsLikeListUsersSql(rows: readonly UserRow[]): UserRow[] {
+  return [...rows].sort(
+    (a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email),
+  );
+}
+
+/** Same ordering as GET /users at startup (LIST_USERS_SQL on M1 seed). Preload required. */
+export function usersServeRowsFromSeed(): UserRow[] {
+  const db = openDatabase(":memory:");
+  try {
+    return listUsers(db);
+  } finally {
+    db.close();
+  }
+}
+
 export function insertUser(db: Database, row: UserRow): UserRow {
   db.prepare("INSERT INTO users (name, email, zip) VALUES ($name, $email, $zip)").run({
     $name: row.name,

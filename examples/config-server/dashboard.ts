@@ -1,8 +1,7 @@
 import dashboardToml from "../../playground/fixtures/dashboard.toml";
 import postMd from "../../playground/fixtures/post.md";
-import usersCsv from "../../playground/fixtures/users.csv";
 
-import type { UserRow } from "./db.ts";
+import { usersServeRowsFromSeed } from "./db.ts";
 
 export type DashboardConfig = typeof dashboardToml;
 export type DashboardPanelConfig = DashboardConfig["panels"][number];
@@ -13,13 +12,6 @@ export type DashboardPayload = {
 };
 
 const FIXTURES = new URL("../../playground/fixtures/", import.meta.url);
-
-/** Served view for users panels (matches LIST_USERS_SQL ordering). */
-export function servedUsersPanelData(rows: readonly UserRow[]): UserRow[] {
-  return [...rows].sort(
-    (a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email),
-  );
-}
 
 /** Served view for docs panels — full typed MD import shape. */
 export function servedDocsPanelData(doc: typeof postMd) {
@@ -34,8 +26,8 @@ async function assertFixtureExists(source: string): Promise<void> {
 }
 
 /**
- * Resolve panel data at startup (static). Unknown type/source or missing file → throw.
- * Depth-1 only: source must name a leaf file, not another composition.
+ * Test-only injection for bad-config cases. App startup uses loadDashboard() only.
+ * buildDashboardFromConfig accepts runtime { type, source }[] — not the typed import cast.
  */
 export async function buildDashboardFromConfig(
   config: { title: string; panels: readonly { type: string; source: string }[] },
@@ -50,7 +42,7 @@ export async function buildDashboardFromConfig(
       if (source !== "users.csv") {
         throw new Error(`dashboard: unsupported users source ${JSON.stringify(source)}`);
       }
-      panels.push({ type: "users", data: servedUsersPanelData(usersCsv) });
+      panels.push({ type: "users", data: usersServeRowsFromSeed() });
       continue;
     }
 
@@ -68,6 +60,7 @@ export async function buildDashboardFromConfig(
   return { title: config.title, panels };
 }
 
+/** App path: typed dashboard.toml import only. */
 export async function loadDashboard(): Promise<DashboardPayload> {
   return buildDashboardFromConfig(dashboardToml);
 }
