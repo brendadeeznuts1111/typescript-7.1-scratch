@@ -4,6 +4,7 @@ ratio = 0.5
 debug = true
 started = 1979-05-27T07:32:00Z
 day = 1979-05-27
+meta = { host = "localhost", port = 8080 }
 
 [server]
 host = "localhost"
