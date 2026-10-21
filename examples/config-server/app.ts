@@ -1,3 +1,4 @@
+import { loadDashboard } from "./dashboard.ts";
 import { loadRuntimeConfig, startupConfigForLog } from "./config.ts";
 import { openDatabase } from "./db.ts";
 import { createLiveHub } from "./live.ts";
@@ -9,9 +10,10 @@ const { port, dbPath } = runtimeConfig;
 console.log(Bun.inspect(startupConfigForLog(runtimeConfig), { sorted: true }));
 await initRedisAtStartup();
 
+const dashboard = await loadDashboard();
 const db = openDatabase(dbPath);
 const live = createLiveHub();
-const handlers = createHandlers(db, live, getRedisClient());
+const handlers = createHandlers(db, live, getRedisClient(), dashboard);
 
 // Canonical Bun.serve({ fetch, websocket }) — upgrade in fetch via server.upgrade(req).
 const server = Bun.serve({
@@ -26,6 +28,7 @@ const server = Bun.serve({
     }
 
     if (url.pathname === "/health" && req.method === "GET") return handlers.health();
+    if (url.pathname === "/dashboard" && req.method === "GET") return handlers.dashboard();
     if (url.pathname === "/users" && req.method === "GET") return handlers.users();
     if (url.pathname === "/users" && req.method === "POST") return handlers.postUser(req);
 

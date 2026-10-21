@@ -51,6 +51,10 @@ Cross-cutting invariants (all milestones):
 - [x] **Secret redaction** — `Redacted` + `Bun.inspect.custom`; startup `Bun.inspect(..., { sorted: true })`; `secret-redaction.parity.test.ts` + `SECRET_TOKEN` canary in `sample.env`.
 - [ ] **Bump-path doc** — `contracts/README.md` gains a "re-pin motherload + re-run `ci:local`" checklist tied to the `typescript@beta` resolution step already documented.
 
+## Range — compositional parity
+
+- [x] **`dashboard.toml` composition** — `GET /dashboard`; `app-dashboard-composition.parity.test.ts` · `describe("two-clock (dashboard composition)")`. Claim: `panels[i].data === servedView[type](mapper(source))` — users: `servedUsersPanelData ∘ csv.normalize`; docs: full `{ frontmatter, md }` via `md.normalize`. Depth-1 refs only; missing fixture fails at startup. `dashboard-types.probe.ts`: `type` narrows to `"users" | "docs"` (verified `tsc --runExternalCode`).
+
 ## Deferred / not planned
 
 - Redis/WS dynamic routes beyond `/live` (M2+ only if a contract demands it).

@@ -1,0 +1,10 @@
+# Depth-1 only: source names a leaf fixture under playground/fixtures/.
+title = "Users & Docs"
+
+[[panels]]
+type = "users"
+source = "users.csv"
+
+[[panels]]
+type = "docs"
+source = "post.md"

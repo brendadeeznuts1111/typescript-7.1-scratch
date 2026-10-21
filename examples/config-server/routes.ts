@@ -1,15 +1,25 @@
 import type { Database } from "bun:sqlite";
 import type { RedisClient } from "bun";
 
+import type { DashboardPayload } from "./dashboard.ts";
 import { docFixtureFile, docFrontmatter, slugToFixture } from "./docs.ts";
 import { insertUser, listUsers, type UserRow } from "./db.ts";
 import type { LiveHub } from "./live.ts";
 import { usersCacheKey } from "./redis.ts";
 
-export function createHandlers(db: Database, live: LiveHub, redisClient: RedisClient | null) {
+export function createHandlers(
+  db: Database,
+  live: LiveHub,
+  redisClient: RedisClient | null,
+  dashboard: DashboardPayload,
+) {
   return {
     health(): Response {
       return Response.json({ ok: true });
+    },
+
+    dashboard(): Response {
+      return Response.json(dashboard);
     },
 
     async users(): Promise<Response> {
