@@ -2,16 +2,24 @@
 
 Playground for [TypeScript 7.1 content mappers](https://devblogs.microsoft.com/typescript/announcing-typescript-7-1-beta/) and [motherload](https://github.com/colinhacks/motherload).
 
-**Upstream:** [colinhacks/motherload](https://github.com/colinhacks/motherload) · [motherload.dev](https://motherload.dev) · playground fixtures from [`lab/basic`](https://github.com/colinhacks/motherload/tree/main/lab/basic). This repo pins **`motherload@0.1.0`**; upstream is at **0.2.0** ([pin](https://github.com/colinhacks/motherload/commit/f9e9fabc8b1131010bd614d8b48aa765804f9d19)). Runtime here uses `bun --preload motherload/register` (Node uses `--import motherload/register`).
+**Upstream:** [colinhacks/motherload](https://github.com/colinhacks/motherload) · [motherload.dev](https://motherload.dev) · fixtures from [`lab/basic`](https://github.com/colinhacks/motherload/tree/main/lab/basic). This repo matches npm **[motherload v0.1.0](https://github.com/colinhacks/motherload/releases/tag/v0.1.0)** (tag `1e3fad2`: unified content mapper, eight format packages, JSON Schema moved to [dotschema](https://www.npmjs.com/package/dotschema)). Latest upstream is **[v0.2.0](https://github.com/colinhacks/motherload/releases/tag/v0.2.0)** (webpack / turbopack / vite / jest plugins). Runtime here: `bun --preload motherload/register` (Node: `--import motherload/register`). Contract tests in [`contracts/`](contracts/) assert mapper codegen vs preload parity on shared fixtures.
 
 Thread: [@colinhacks on content mappers](https://x.com/colinhacks/status/2112954197373259850) and the [IntelliSense screenshot](https://x.com/colinhacks/status/2112954199843758219) (“mother of all content mappers”). Layer 01 mirrors that `.md` + frontmatter hover story; fixtures come from motherload `lab/basic`, not from X media.
 
-Requires [Bun](https://bun.com) and TypeScript 7.1 beta. MIT licensed — see [LICENSE](./LICENSE).
+Requires [Bun](https://bun.com) and TypeScript **7.1 beta** (npm tag **`beta`**, not `next`). MIT licensed — see [LICENSE](./LICENSE).
 
 ## Setup
 
+Pins match [motherload v0.1.0](https://github.com/colinhacks/motherload/releases/tag/v0.1.0): **`motherload@0.1.0`** and **`typescript@beta`** (exact `7.1.0-beta` in `package.json` — verify with `npm view typescript@beta version` before changing). Do not use `typescript@next`; the `next` tag can move past the 7.1 beta that documents `contentMappers` and `--runExternalCode`.
+
 ```bash
 bun install
+```
+
+npm equivalent (upstream docs canon):
+
+```bash
+npm install -D motherload@0.1.0 typescript@beta
 ```
 
 ### Minimal IntelliSense example

@@ -14,7 +14,8 @@
     "typecheck": "bun check",
     "typecheck:playground": "tsc -p playground --noEmit --runExternalCode",
     "playground": "bun --preload motherload/register playground/main.ts",
-    "ci:local": "bun ci && bun run typecheck:playground && bun run playground",
+    "test:contracts": "bun test contracts",
+    "ci:local": "bun ci && bun run typecheck:playground && bun run playground && bun run test:contracts",
     "typecheck:example": "tsc -p examples/intellisense-markdown --noEmit --runExternalCode",
     "example:intellisense": "bun --preload motherload/register examples/intellisense-markdown/main.ts",
     "typecheck:example-toml": "tsc -p examples/intellisense-toml --noEmit --runExternalCode",
@@ -24,8 +25,8 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "motherload": "^0.1.0",
-    "typescript": "^7.1.0-beta"
+    "motherload": "0.1.0",
+    "typescript": "7.1.0-beta"
   },
   "peerDependencies": {
     "typescript": "^7"

@@ -6,8 +6,8 @@
       "name": "typescript-7.1-scratch",
       "devDependencies": {
         "@types/bun": "latest",
-        "motherload": "^0.1.0",
-        "typescript": "^7.1.0-beta",
+        "motherload": "0.1.0",
+        "typescript": "7.1.0-beta",
       },
       "peerDependencies": {
         "typescript": "^7",

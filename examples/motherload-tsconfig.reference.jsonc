@@ -2,6 +2,7 @@
   // Canonical contentMappers block (motherload docs / demo screenshots).
   // Copy into your tsconfig.json or tsconfig.jsonc.
   //
+  // Install (v0.1.0 release): npm install -D motherload@0.1.0 typescript@beta
   // Typecheck: tsc --noEmit --runExternalCode
   // Runtime (Bun): bun --preload motherload/register main.ts
   //
