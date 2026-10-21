@@ -20,6 +20,7 @@ Cross-cutting invariants (all milestones):
 
 ## M3 — Full parity
 
+- [x] **CSV full-chain receipt** — `app-csv-full-chain.parity.test.ts`: mapper ≟ SQLite (`ORDER BY rowid`) ≟ `GET /users` JSON (bare array); three pairwise asserts; catches handler reshaping/coercion/reorder.
 - [x] **CSV motherload ≟ SQLite round-trip** — `app-csv-motherload-sqlite.parity.test.ts`: runtime preload import ≟ M1 seed (`ORDER BY rowid`, TEXT columns). Not a three-way label: preload arm B makes mapper ≟ runtime redundant with file parity; B ≟ C is storage fidelity.
 - [x] **CSV two-clock arm** — Bun has no native CSV import; independent arm = `Bun.file().text()` + `csv-parse/sync` (`columns: true`, `bom: true`, `skip_empty_lines: true`) → `Array<Record<string, string>>`; **no adapter** (same shape as motherload). `contracts/csv-two-clock.parity.test.ts`.
 - [x] **TOML two-clock arm** — `smol-toml` via `contracts/bin/native-toml-child.ts`; fixture `playground/fixtures/config-edge.toml` (underscore int, dates, inline table). `playground/fixtures/config.toml` is **not** used: smol-toml rejects its bigint / mixed-type arrays — documented parser surface gap, not coerced in tests.
