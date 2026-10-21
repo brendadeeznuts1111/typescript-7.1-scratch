@@ -1,10 +1,12 @@
-import { loadRuntimeConfig } from "./config.ts";
+import { loadRuntimeConfig, startupConfigForLog } from "./config.ts";
 import { openDatabase } from "./db.ts";
 import { createLiveHub } from "./live.ts";
 import { getRedisClient, initRedisAtStartup } from "./redis.ts";
 import { createHandlers } from "./routes.ts";
 
-const { port, dbPath } = loadRuntimeConfig();
+const runtimeConfig = loadRuntimeConfig();
+const { port, dbPath } = runtimeConfig;
+console.log(Bun.inspect(startupConfigForLog(runtimeConfig), { sorted: true }));
 await initRedisAtStartup();
 
 const db = openDatabase(dbPath);

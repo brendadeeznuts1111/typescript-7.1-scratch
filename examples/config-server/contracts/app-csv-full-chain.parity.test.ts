@@ -112,6 +112,7 @@ describe("full-chain (csv: mapper ≟ sqlite ≟ http /users)", () => {
     expect(res.status).toBe(200);
     const C = normalize(usersFromHttpBody(await res.json()));
 
+    // Bun.deepEquals semantics (via expect().toEqual)
     expect(A).toEqual(B);
     expect(B).toEqual(C);
     expect(A).toEqual(C);
