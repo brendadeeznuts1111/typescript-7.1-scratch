@@ -31,10 +31,11 @@ async function readStartupUrl(stream: ReadableStream<Uint8Array>): Promise<strin
 }
 
 beforeAll(async () => {
+  const { REDIS_URL: _omitRedis, ...envWithoutRedis } = process.env;
   server = Bun.spawn({
     cmd: ["bun", "--preload", "motherload/register", APP],
     cwd: REPO_ROOT,
-    env: { ...process.env, PORT: "0", DB_PATH: ":memory:" },
+    env: { ...envWithoutRedis, PORT: "0", DB_PATH: ":memory:" },
     stdout: "pipe",
     stderr: "pipe",
   });

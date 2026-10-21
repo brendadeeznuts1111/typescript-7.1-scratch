@@ -1,17 +1,28 @@
 import type { Database } from "bun:sqlite";
+import type { RedisClient } from "bun";
 
 import { docFixtureFile, docFrontmatter, slugToFixture } from "./docs.ts";
 import { insertUser, listUsers, type UserRow } from "./db.ts";
 import type { LiveHub } from "./live.ts";
+import { usersCacheKey } from "./redis.ts";
 
-export function createHandlers(db: Database, live: LiveHub) {
+export function createHandlers(db: Database, live: LiveHub, redisClient: RedisClient | null) {
   return {
     health(): Response {
       return Response.json({ ok: true });
     },
 
-    users(): Response {
-      return Response.json(listUsers(db));
+    async users(): Promise<Response> {
+      const key = usersCacheKey();
+      if (redisClient) {
+        const hit = await redisClient.get(key);
+        if (hit) return Response.json(JSON.parse(hit));
+      }
+      const rows = listUsers(db);
+      if (redisClient) {
+        await redisClient.set(key, JSON.stringify(rows), "EX", 60);
+      }
+      return Response.json(rows);
     },
 
     async postUser(req: Request): Promise<Response> {
@@ -28,6 +39,9 @@ export function createHandlers(db: Database, live: LiveHub) {
       // Broadcast before response so app-parity tests can assert sequentially:
       // await wsOpened → register listener → await fetch(POST) → await broadcast.
       await live.publishAsync({ type: "user.created", user: row });
+      if (redisClient) {
+        await redisClient.del(usersCacheKey());
+      }
       return Response.json(row, { status: 201 });
     },
 

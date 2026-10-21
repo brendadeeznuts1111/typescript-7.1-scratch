@@ -24,6 +24,8 @@ Startup: `app.ts` prints `listening on http://127.0.0.1:<port>` to **stdout** (e
 
 WebSocket: `fetch` calls `server.upgrade(req)` on `/live` (426 if not an upgrade). Startup URL uses `server.port` after `Bun.serve` (including `PORT=0`).
 
+**Redis (optional):** when `REDIS_URL` is set, uses the default client from `"bun"` (dynamic import — no top-level `redis` import). `GET /users` caches JSON at `${REDIS_KEY_PREFIX ?? "test:"}users:all` (TTL 60s); `POST /users` deletes the key after broadcast. App-parity spawns omit `REDIS_URL`; see `describe("app-level (redis)")`.
+
 `PORT` and `DB_PATH` come from `process.env` after `loadEnvFile` on `playground/fixtures/sample.env`, then fall back to `config.toml`.
 
 ## Contracts

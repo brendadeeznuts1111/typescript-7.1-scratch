@@ -12,7 +12,7 @@ Cross-cutting invariants (all milestones):
 
 - [x] **`GET /docs/:slug/raw`** — `new Response(Bun.file(fixturePath))`; byte-equal smoke test (`rule: none, run-clock smoke`). Slug → path via `slugToFixture` only.
 - [x] **`POST /users`** — SQLite insert → publish → response; WS `/live` via `fetch` + `server.upgrade`.
-- [ ] **Redis arm (conditional)** — `REDIS_URL` unset → skip; set → invalidate cache key on POST. No new fixture, no new rule.
+- [x] **Redis arm (conditional)** — default `redis` from `"bun"` when `REDIS_URL` set; `GET /users` cache + `POST` del; tests in `describe("app-level (redis)")`.
 - [ ] **WS roundtrip test** — connect → POST → assert broadcast received → assert cache key state. Design for the POST-response / WS-delivery race explicitly.
 - [ ] **WS handshake** — reuse `readStartupUrl`; derive `ws://host:port/live`.
 

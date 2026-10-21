@@ -1,12 +1,15 @@
 import { loadRuntimeConfig } from "./config.ts";
 import { openDatabase } from "./db.ts";
 import { createLiveHub } from "./live.ts";
+import { getRedisClient, initRedisAtStartup } from "./redis.ts";
 import { createHandlers } from "./routes.ts";
 
 const { port, dbPath } = loadRuntimeConfig();
+await initRedisAtStartup();
+
 const db = openDatabase(dbPath);
 const live = createLiveHub();
-const handlers = createHandlers(db, live);
+const handlers = createHandlers(db, live, getRedisClient());
 
 // Canonical Bun.serve({ fetch, websocket }) — upgrade in fetch via server.upgrade(req).
 const server = Bun.serve({
