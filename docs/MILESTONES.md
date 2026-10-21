@@ -45,6 +45,8 @@ Cross-cutting invariants (all milestones):
 ## M4 — Hardening
 
 - [x] **`ci:local` drift gate** — `scripts/test-contracts.ts` writes `artifacts/contracts/` (rule receipts, startup inspect, parity fail JSON); GitHub Actions uploads on failure — not raw stdout (OS-assigned listen port excluded).
+
+**Known gap:** `scripts/test-contracts.ts` artifact writes are untested. A future `test:artifacts` script could run a known-failing case against a scratch directory and assert the receipt files are present and redacted. Not blocking; the runtime meta-tests cover the values themselves.
 - [x] **Receipt determinism audit** — `contracts/receipt-determinism.parity.test.ts`: byte-identical receipts, no paths/timestamps/`process.env` in `receiptForRule` output (M4.3 depends on this).
 - [x] **Secret redaction** — `Redacted` + `Bun.inspect.custom`; startup `Bun.inspect(..., { sorted: true })`; `secret-redaction.parity.test.ts` + `SECRET_TOKEN` canary in `sample.env`.
 - [ ] **Bump-path doc** — `contracts/README.md` gains a "re-pin motherload + re-run `ci:local`" checklist tied to the `typescript@beta` resolution step already documented.
