@@ -30,13 +30,19 @@ describe(`two-clock (md, ${RECEIPT})`, () => {
     const fixture = "playground/fixtures/post-edge.md";
     const absPath = absoluteFixturePath(fixture);
 
-    const mapperValue = normalize(await snapshot(fixture)) as { md: string; frontmatter: unknown };
-    const externalValue = normalize(await externalMdFrontmatterSnapshot(absPath)) as {
+    const mapperRaw = (await snapshot(fixture)) as { md: string; frontmatter: Record<string, unknown> };
+    const externalRaw = (await externalMdFrontmatterSnapshot(absPath)) as {
       md: string;
-      frontmatter: unknown;
+      frontmatter: Record<string, unknown>;
     };
+    // published: 2024-01-15 — raw arms both string (YAML 1.2); not Date coercion hidden by mdShapeKeySort.
+    expect(typeof mapperRaw.frontmatter.published).toBe("string");
+    expect(typeof externalRaw.frontmatter.published).toBe("string");
+    expect(mapperRaw.frontmatter.published).toBe("2024-01-15");
 
-    expect(mapperValue.frontmatter).toEqual(externalValue.frontmatter);
-    expect(mapperValue.md).toBe(externalValue.md);
+    const mapperValue = normalize(mapperRaw);
+    const externalValue = normalize(externalRaw);
+
+    expect(mapperValue).toEqual(externalValue);
   });
 });
