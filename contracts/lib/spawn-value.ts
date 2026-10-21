@@ -8,6 +8,7 @@ import { REPO_ROOT } from "./paths.ts";
 const RUNTIME_CHILD = join(REPO_ROOT, "contracts/bin/runtime-import-child.ts");
 const NATIVE_CSV_CHILD = join(REPO_ROOT, "contracts/bin/native-csv-child.ts");
 const NATIVE_TOML_CHILD = join(REPO_ROOT, "contracts/bin/native-toml-child.ts");
+const NATIVE_MD_CHILD = join(REPO_ROOT, "contracts/bin/native-md-child.ts");
 
 async function runChild(cmd: string[], absPath: string): Promise<unknown> {
   const proc = Bun.spawn({
@@ -45,4 +46,9 @@ export async function externalCsvParseSnapshot(absPath: string): Promise<unknown
 /** smol-toml arm: Bun.file + external parser, no preload (honest second clock for TOML). */
 export async function externalTomlParseSnapshot(absPath: string): Promise<unknown> {
   return runChild(["bun", NATIVE_TOML_CHILD], absPath);
+}
+
+/** Frontmatter arm: --- split + Bun.YAML.parse, no preload (not Bun.markdown). */
+export async function externalMdFrontmatterSnapshot(absPath: string): Promise<unknown> {
+  return runChild(["bun", NATIVE_MD_CHILD], absPath);
 }

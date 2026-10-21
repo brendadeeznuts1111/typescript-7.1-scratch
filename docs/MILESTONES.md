@@ -23,7 +23,7 @@ Cross-cutting invariants (all milestones):
 - [x] **CSV motherload ≟ SQLite round-trip** — `app-csv-motherload-sqlite.parity.test.ts`: runtime preload import ≟ M1 seed (`ORDER BY rowid`, TEXT columns). Not a three-way label: preload arm B makes mapper ≟ runtime redundant with file parity; B ≟ C is storage fidelity.
 - [x] **CSV two-clock arm** — Bun has no native CSV import; independent arm = `Bun.file().text()` + `csv-parse/sync` (`columns: true`, `bom: true`, `skip_empty_lines: true`) → `Array<Record<string, string>>`; **no adapter** (same shape as motherload). `contracts/csv-two-clock.parity.test.ts`.
 - [x] **TOML two-clock arm** — `smol-toml` via `contracts/bin/native-toml-child.ts`; fixture `playground/fixtures/config-edge.toml` (underscore int, dates, inline table). `playground/fixtures/config.toml` is **not** used: smol-toml rejects its bigint / mixed-type arrays — documented parser surface gap, not coerced in tests.
-- [ ] **MD two-clock arm** — `post.md` → `/docs/:slug` (next after TOML).
+- [x] **MD two-clock arm** — `contracts/md-two-clock.parity.test.ts` · `post.md` + `post-edge.md` (date string, multiline `|`). **Bun.markdown is a renderer, not a frontmatter parser** ([issue #26605](https://github.com/oven-sh/bun/issues/26605)). Arm B = frontmatter splitter (regex) + `Bun.YAML.parse` (tier 2, no devDep). Frontmatter parity + body text-equal; not two independent markdown renders. True `{ md, frontmatter }` via a second full MD parser deferred unless body-rendering parity is required.
 - [ ] **`sample.env`** — side-effect contract via `rules.env`, not external-parser two-clock.
 - **Two-clock matrix scope:** every fixture that flows through `config-server` gets an independent-parser arm when a honest external parser exists. Curriculum fixtures (layers 01–07 only) are compile-only and **excluded** — not 11 devDeps.
 
@@ -31,7 +31,7 @@ Cross-cutting invariants (all milestones):
 |---|---|---|
 | `users.csv` | `db.ts` → `GET /users` | ✅ csv-parse |
 | `config.toml` (app) / `config-edge.toml` (contract) | `config.ts` | ✅ smol-toml (`config-edge.toml`) |
-| `post.md` | `docs.ts` | ⬜ pending |
+| `post.md` / `post-edge.md` | `docs.ts` | ✅ Bun.YAML.parse + split |
 | `sample.env` | `loadEnvFile` | env rule, not matrix |
 - [ ] **Layer 08 attribute arm wired into harness** — same process, `with { type: "json" }` vs mapper path; parity asserted via existing normalizer.
 - [ ] **`env` contract formalized** — keys-present assertions against `sample.env`; document `loadEnvFile` side-effect boundary in `contracts/README.md`.
