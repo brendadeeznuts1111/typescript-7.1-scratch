@@ -10,10 +10,11 @@ const FIXTURE = "playground/fixtures/users.csv";
 const APP = join(REPO_ROOT, "examples/config-server/app.ts");
 const normalize = rules.csv.normalize;
 
-// This test is the only one that catches handler-side reshaping.
-// A handler that does `row.zip = parseInt(row.zip)`, `delete row.email`,
-// or `SELECT * FROM users LIMIT 1` would pass mapper ≟ sqlite but fail
-// here. That is the claim: the type clock predicts what the client receives.
+// This test catches handler-side reshaping: type coercion (zip: "02134" → 2134),
+// column drop (delete row.email), and — because the fixture is sorted so that
+// rowid order ≠ name order — any handler that changes its ORDER BY clause
+// without updating the SQLite arm. Both arms declare ORDER BY name ASC, rowid ASC;
+// if that clause drifts on either side, this test fails.
 
 let server: ReturnType<typeof Bun.spawn>;
 let base: string;
@@ -40,9 +41,9 @@ async function freshSqliteRows(): Promise<unknown> {
       "--preload",
       "motherload/register",
       "-e",
-      `import { openDatabase } from "./examples/config-server/db.ts";
+      `import { openDatabase, LIST_USERS_SQL } from "./examples/config-server/db.ts";
 const db = openDatabase(":memory:");
-const rows = db.query("SELECT name, email, zip FROM users ORDER BY rowid").all();
+const rows = db.query(LIST_USERS_SQL).all();
 console.log(JSON.stringify(rows));
 db.close();`,
     ],
@@ -59,6 +60,15 @@ db.close();`,
     throw new Error(stderr.trim() || stdout.trim() || `M1 seed child exit ${exitCode}`);
   }
   return wireParse(stdout);
+}
+
+type UserRow = { name: string; email: string; zip: string };
+
+/** Mapper CSV order ≠ served order; canonicalize to match LIST_USERS_SQL. */
+function canonicalServeOrder(rows: UserRow[]): UserRow[] {
+  return [...rows].sort(
+    (a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email),
+  );
 }
 
 /** GET /users returns a bare array of rows (not { users } / { data, meta }). */
@@ -90,14 +100,14 @@ afterAll(() => {
 
 describe("full-chain (csv: mapper ≟ sqlite ≟ http /users)", () => {
   test("three pairwise: storage fidelity, handler fidelity, full-chain claim", async () => {
-    const A = normalize(await snapshot(FIXTURE));
+    const mapperRows = (await snapshot(FIXTURE)) as UserRow[];
+    const A = normalize(canonicalServeOrder(mapperRows));
     const B = normalize(await freshSqliteRows());
 
     const res = await fetch(`${base}/users`);
     expect(res.status).toBe(200);
     const C = normalize(usersFromHttpBody(await res.json()));
 
-    // rowid relies on M1 insert order; GET /users uses listUsers (ORDER BY name) — same order for seed fixture.
     expect(A).toEqual(B);
     expect(B).toEqual(C);
     expect(A).toEqual(C);

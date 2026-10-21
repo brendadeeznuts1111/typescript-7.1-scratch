@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 
+// users.csv: Zelda first in file so rowid insert order ≠ ORDER BY name (full-chain sort test).
 import users from "../../playground/fixtures/users.csv";
 
 export function openDatabase(dbPath: string): Database {
@@ -26,8 +27,12 @@ export type UserRow = {
   zip: string;
 };
 
+/** Shared with contract SQLite arm B — keep in sync with full-chain tests. */
+export const LIST_USERS_SQL =
+  "SELECT name, email, zip FROM users ORDER BY name ASC, rowid ASC";
+
 export function listUsers(db: Database) {
-  return db.query("SELECT name, email, zip FROM users ORDER BY name").all() as UserRow[];
+  return db.query(LIST_USERS_SQL).all() as UserRow[];
 }
 
 export function insertUser(db: Database, row: UserRow): UserRow {

@@ -54,8 +54,15 @@ describe("app parity (mapper ≟ served)", () => {
     const res = await fetch(`${base}/users`);
     expect(res.status).toBe(200);
     const body = await res.json();
-    const mapperRows = await snapshot("playground/fixtures/users.csv");
-    expect(body).toEqual(rules.csv.normalize(mapperRows));
+    const mapperRows = (await snapshot("playground/fixtures/users.csv")) as {
+      name: string;
+      email: string;
+      zip: string;
+    }[];
+    const served = [...mapperRows].sort(
+      (a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email),
+    );
+    expect(body).toEqual(rules.csv.normalize(served));
   });
 
   test("GET /docs/hello/frontmatter matches mapper MD arm", async () => {

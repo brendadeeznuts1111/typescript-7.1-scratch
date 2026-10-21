@@ -13,10 +13,12 @@ expect<
 expect<Equal<typeof scores, readonly { readonly player: string; readonly score: string }[]>>();
 
 export function layerTabular() {
+  const ada = users.find((u) => u.name === "Ada Lovelace");
+  const grace = users.find((u) => u.name === "Hopper, Grace");
   return {
     layer: "05-tabular",
-    adaZip: users[0]?.zip,
-    graceName: users[1]?.name,
+    adaZip: ada?.zip,
+    graceName: grace?.name,
     topScore: scores[0]?.score,
     runnerUp: scores[1]?.player,
   };
