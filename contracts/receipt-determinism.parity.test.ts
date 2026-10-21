@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
+import { startupConfigForLog } from "../examples/config-server/config.ts";
+import { Redacted } from "../examples/config-server/redacted.ts";
 import { RULE_ENTRIES, receiptForRule, type NormalizeRule } from "./rules.ts";
 
 /**
@@ -31,6 +33,21 @@ function assertExceptionReasonStatic(rule: NormalizeRule): void {
 }
 
 describe("receipts (determinism + scrubbing)", () => {
+  test("startup config log is deterministic and path-free", () => {
+    const config = startupConfigForLog({
+      port: 0,
+      dbPath: ":memory:",
+      envFixture: "<fixture>",
+      secretToken: new Redacted("sk-test-do-not-log-9f3a"),
+    });
+    const log = Bun.inspect(config, { sorted: true });
+    expect(log).toBe(Bun.inspect(config, { sorted: true }));
+    expect(log).not.toMatch(/\/(Users|home|root|var|tmp)\//);
+    expect(log).not.toMatch(/\b\d{4}-\d{2}-\d{2}T/);
+    expect(log).toContain("port: 0");
+    expect(log).not.toContain("sk-test-do-not-log-9f3a");
+  });
+
   for (const [format, rule] of RULE_ENTRIES) {
     test(`${format} receipt is deterministic and scrubbed`, () => {
       const first = receiptForRule(rule);
