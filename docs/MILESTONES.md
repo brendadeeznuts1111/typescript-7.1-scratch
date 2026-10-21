@@ -40,10 +40,12 @@ Cross-cutting invariants (all milestones):
 
 **Scope guard:** normalizer rules stay data-driven; no ad-hoc `switch (format)` reintroduced.
 
+**Fixture ownership:** `playground/fixtures/users.csv` is shared by config-server seed and layer 05 curriculum; column or row-shape changes affect both paths.
+
 ## M4 — Hardening
 
 - [ ] **`ci:local` drift gate** — `test:contracts` already runs; add receipt-artifact upload on failure so drift diffs are inspectable across runs.
-- [ ] **Receipt determinism audit** — assert no absolute paths / timestamps / `process.env` values leak into `receiptForRule` output (currently static; lock it with a meta-test).
+- [x] **Receipt determinism audit** — `contracts/receipt-determinism.parity.test.ts`: byte-identical receipts, no paths/timestamps/`process.env` in `receiptForRule` output (M4.3 depends on this).
 - [ ] **Secret redaction** — logs + receipt snapshots scrub `.env` values.
 - [ ] **Bump-path doc** — `contracts/README.md` gains a "re-pin motherload + re-run `ci:local`" checklist tied to the `typescript@beta` resolution step already documented.
 

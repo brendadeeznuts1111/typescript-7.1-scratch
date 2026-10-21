@@ -64,7 +64,11 @@ db.close();`,
 
 type UserRow = { name: string; email: string; zip: string };
 
-/** Mapper CSV order ≠ served order; canonicalize to match LIST_USERS_SQL. */
+/**
+ * Literal sort-by-name (email tiebreak) — NOT derived from LIST_USERS_SQL.
+ * If LIST_USERS_SQL's ORDER BY changes, update this deliberately so A ≟ B fails
+ * until both encode the same served order.
+ */
 function canonicalServeOrder(rows: UserRow[]): UserRow[] {
   return [...rows].sort(
     (a, b) => a.name.localeCompare(b.name) || a.email.localeCompare(b.email),
