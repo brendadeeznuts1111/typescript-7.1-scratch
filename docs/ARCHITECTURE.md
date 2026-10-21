@@ -81,7 +81,7 @@ Contract harness details: [contracts/README.md](../contracts/README.md).
 | File parity (M1) | `contracts/*.parity.test.ts` + `rules.ts` | manifest fixtures | mapper ≟ preload | normalizer in harness |
 | CSV two-clock | `csv-two-clock.parity.test.ts` | `users.csv` | both arms | `native-csv-child` (no preload) |
 | TOML two-clock | `toml-two-clock.parity.test.ts` | `config-edge.toml` (edge) | mapper arm | smol-toml child |
-| TOML shape divergence | `toml-bun-native-shape.parity.test.ts` | `config-edge.toml` | ISO string datetimes | `Bun.TOML.parse` → `Temporal` (not normalized) |
+| TOML shape divergence | `toml-bun-native-shape.divergence.test.ts` | `config-edge.toml` | ISO string datetimes | `Bun.TOML.parse` → `Temporal` (not normalized) |
 | MD two-clock | `md-two-clock.parity.test.ts` | `post.md`, `post-edge.md` | mapper arm | YAML + split (not `Bun.markdown`) |
 | Storage fidelity | `app-csv-motherload-sqlite.parity.test.ts` | same CSV | preload import | SQLite TEXT + `ORDER BY rowid` |
 | Full chain | `app-csv-full-chain.parity.test.ts` | Zelda-first CSV | canonical sort expectation | `LIST_USERS_SQL` ≟ `GET /users` |
@@ -137,7 +137,7 @@ Framing: **maintenance, not thesis** — the claim is intact; items below are no
 
 ### TOML — three parsers, datetime shape divergence
 
-On `config-edge.toml`, **motherload mapper** and **smol-toml** agree: offset datetimes are **ISO strings** (e.g. `"1979-05-27T07:32:00.000Z"`). **`Bun.TOML.parse`** parses the same file but returns **`Temporal.Instant`** for offset date-times; `toJSON()` yields `"1979-05-27T07:32:00Z"` (no `.000` ms). That is a **known shape divergence**, tested in `toml-bun-native-shape.parity.test.ts`, **not** smoothed by `rules.toml.normalize`. Migrating from motherload preload to `Bun.TOML.parse` changes datetime field types at runtime.
+On `config-edge.toml`, **motherload mapper** and **smol-toml** agree: offset datetimes are **ISO strings** (e.g. `"1979-05-27T07:32:00.000Z"`). **`Bun.TOML.parse`** parses the same file but returns **`Temporal.Instant`** for offset date-times; `toJSON()` yields `"1979-05-27T07:32:00Z"` (no `.000` ms). That is a **known shape divergence**, tested in `toml-bun-native-shape.divergence.test.ts`, **not** smoothed by `rules.toml.normalize`. Migrating from motherload preload to `Bun.TOML.parse` changes datetime field types at runtime.
 
 **`config.toml`** (app) is **single-parser by construction**: lossless bigint and mixed-type arrays — neither smol-toml nor `Bun.TOML.parse` can confirm it on the external arm. **`config-edge.toml`** covers the parseable cross-parser surface (underscore int, datetimes, inline table, standard table).
 
