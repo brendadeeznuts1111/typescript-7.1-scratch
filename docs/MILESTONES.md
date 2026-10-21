@@ -20,8 +20,9 @@ Cross-cutting invariants (all milestones):
 
 ## M3 — Full parity
 
-- [ ] **Three-way CSV contract** — mapper ≟ Bun import ≟ SQLite round-trip. Requires deciding schema inference policy (currently `TEXT`-only). This is the decision that unblocks it.
-- [ ] **All 11 fixtures in conformance matrix** — extend `app.parity.test.ts` coverage beyond `users.csv` + `post.md`.
+- [x] **CSV motherload ≟ SQLite round-trip** — `app-csv-motherload-sqlite.parity.test.ts`: runtime preload import ≟ M1 seed (`ORDER BY rowid`, TEXT columns). Not a three-way label: preload arm B makes mapper ≟ runtime redundant with file parity; B ≟ C is storage fidelity.
+- [ ] **CSV two-clock arm (mapper ≟ Bun native import)** — next commit: spawn child **without** `--preload motherload/register`; same `users.csv`, independent parser; `describe("two-clock (csv)")`. First row of the all-fixtures matrix; catches quoted-comma / leading-zero drift the repo exists to surface. Separate receipt from storage-fidelity test.
+- [ ] **All 11 fixtures in conformance matrix** — extend two-clock + app parity beyond `users.csv` + `post.md` (CSV two-clock above is fixture 1).
 - [ ] **Layer 08 attribute arm wired into harness** — same process, `with { type: "json" }` vs mapper path; parity asserted via existing normalizer.
 - [ ] **`env` contract formalized** — keys-present assertions against `sample.env`; document `loadEnvFile` side-effect boundary in `contracts/README.md`.
 
