@@ -29,7 +29,12 @@ async function runMapperChild(absPath: string): Promise<unknown> {
 
 /**
  * Mapper/codegen snapshot for a repo-relative fixture path.
- * Cached per `(absolutePath, importKind)`; subprocess keeps the test parent honest.
+ *
+ * Cache key is `(repoRelativePath, importKind)` only — **not** mtime or file hash.
+ * Fixtures in this repo are static; entries live for the test process lifetime.
+ * Do not add mtime-based invalidation (races with concurrent writes → false drift receipts).
+ *
+ * Subprocess spawn keeps the test parent off preload so parity is falsifiable.
  */
 export async function snapshot(
   repoRelativePath: string,
