@@ -1,5 +1,10 @@
 import type { ServerWebSocket } from "bun";
 
+/**
+ * M1: manual Set + ws.send. For multi-channel live updates, prefer Bun pub/sub:
+ * `ws.subscribe("live")` in websocket.open and `server.publish("live", payload)` in fetch.
+ */
+
 export type LiveHub = {
   add(ws: ServerWebSocket): void;
   remove(ws: ServerWebSocket): void;

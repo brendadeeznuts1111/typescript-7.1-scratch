@@ -8,6 +8,7 @@ const db = openDatabase(dbPath);
 const live = createLiveHub();
 const handlers = createHandlers(db, live);
 
+// Canonical Bun.serve({ fetch, websocket }) — upgrade in fetch via server.upgrade(req).
 const server = Bun.serve({
   hostname: "127.0.0.1",
   port: Number.isFinite(port) ? port : 3100,
@@ -16,7 +17,7 @@ const server = Bun.serve({
 
     if (url.pathname === "/live") {
       if (srv.upgrade(req)) return;
-      return new Response("Expected WebSocket", { status: 426 });
+      return new Response("Upgrade required", { status: 426 });
     }
 
     if (url.pathname === "/health" && req.method === "GET") return handlers.health();
