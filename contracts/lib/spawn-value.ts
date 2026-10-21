@@ -6,6 +6,7 @@ import { wireParse } from "./json-wire.ts";
 import { REPO_ROOT } from "./paths.ts";
 
 const RUNTIME_CHILD = join(REPO_ROOT, "contracts/bin/runtime-import-child.ts");
+const NATIVE_CSV_CHILD = join(REPO_ROOT, "contracts/bin/native-csv-child.ts");
 
 async function runChild(cmd: string[], absPath: string): Promise<unknown> {
   const proc = Bun.spawn({
@@ -33,4 +34,9 @@ export async function mapperCodegenSnapshot(c: FixtureCase, _absPath: string): P
 /** Runtime arm via motherload/register in a fresh Bun child. */
 export async function runtimeImportSnapshot(_c: FixtureCase, absPath: string): Promise<unknown> {
   return runChild(["bun", "--preload", "motherload/register", RUNTIME_CHILD], absPath);
+}
+
+/** csv-parse arm: Bun.file + external parser, no preload (honest second clock for CSV). */
+export async function externalCsvParseSnapshot(absPath: string): Promise<unknown> {
+  return runChild(["bun", NATIVE_CSV_CHILD], absPath);
 }

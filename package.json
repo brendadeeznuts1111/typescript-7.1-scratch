@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "csv-parse": "^7.0.3",
     "motherload": "0.1.0",
     "typescript": "7.1.0-beta"
   },
