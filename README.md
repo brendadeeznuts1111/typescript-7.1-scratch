@@ -48,7 +48,7 @@ Run with motherload's Bun preload (loads file contents at runtime):
 bun run playground
 ```
 
-See [playground/README.md](./playground/README.md) for the nine-layer tour. Edit fixtures under `playground/fixtures/` and the matching layer file — types update when you re-run typecheck.
+See [playground/README.md](./playground/README.md) for the nine-layer tour. Roadmap: [docs/MILESTONES.md](./docs/MILESTONES.md). Edit fixtures under `playground/fixtures/` and the matching layer file — types update when you re-run typecheck.
 
 ## Notes
 

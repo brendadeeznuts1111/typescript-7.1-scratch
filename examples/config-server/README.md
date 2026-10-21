@@ -13,7 +13,10 @@ curl -s http://127.0.0.1:3100/health
 curl -s http://127.0.0.1:3100/users
 curl -s http://127.0.0.1:3100/docs/hello
 curl -s http://127.0.0.1:3100/docs/hello/frontmatter
+curl -s http://127.0.0.1:3100/docs/hello/raw
 ```
+
+`/docs/:slug/raw` streams `Bun.file` bytes as-on-disk (frontmatter included). App parity compares to `slugToFixture(slug).file.text()` — **rule: none (run-clock smoke)**, not `rules.md`.
 
 Startup: `app.ts` prints `listening on http://127.0.0.1:<port>` to **stdout** (ephemeral `PORT=0` in app-parity tests). Reuse the same handshake for M2 WebSocket discovery.
 

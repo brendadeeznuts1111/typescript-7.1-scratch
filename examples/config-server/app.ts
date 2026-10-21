@@ -13,6 +13,7 @@ const server = Bun.serve({
     "/health": handlers.health,
     "/users": handlers.users,
     "/docs/:slug/frontmatter": (req) => handlers.docsFrontmatter(req.params.slug),
+    "/docs/:slug/raw": (req) => handlers.docsRaw(req.params.slug),
     "/docs/:slug": (req) => handlers.docsBody(req.params.slug),
   },
 });

@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 
-import { docBodyStream, docFrontmatter, docMarkdownBody } from "./docs.ts";
+import { docFixtureFile, docFrontmatter, slugToFixture } from "./docs.ts";
 import { listUsers } from "./db.ts";
 
 export function createHandlers(db: Database) {
@@ -20,14 +20,18 @@ export function createHandlers(db: Database) {
     },
 
     async docsBody(slug: string): Promise<Response> {
-      const frontmatter = docFrontmatter(slug);
-      if (!frontmatter) return new Response("Not Found", { status: 404 });
-      const file = await docBodyStream(slug);
-      if (!file || !(await file.exists())) return new Response("Not Found", { status: 404 });
-      const md = docMarkdownBody(slug);
-      if (md === null) return new Response("Not Found", { status: 404 });
-      // HTTP body = motherload `md`. Bun.file proves the fixture path resolves at runtime.
+      const fx = slugToFixture(slug);
+      if (!fx || !(await fx.file.exists())) return new Response("Not Found", { status: 404 });
+      const md = fx.doc.md;
       return new Response(md, {
+        headers: { "Content-Type": "text/markdown; charset=utf-8" },
+      });
+    },
+
+    async docsRaw(slug: string): Promise<Response> {
+      const file = docFixtureFile(slug);
+      if (!file || !(await file.exists())) return new Response("Not Found", { status: 404 });
+      return new Response(file, {
         headers: { "Content-Type": "text/markdown; charset=utf-8" },
       });
     },

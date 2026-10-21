@@ -1,6 +1,7 @@
-import { afterAll, beforeAll, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { join } from "node:path";
 
+import { slugToFixture } from "../docs.ts";
 import { snapshot } from "../../../contracts/lib/mapper.ts";
 import { REPO_ROOT } from "../../../contracts/lib/paths.ts";
 import { rules } from "../../../contracts/rules.ts";
@@ -42,28 +43,43 @@ afterAll(() => {
   server.kill();
 });
 
-test("GET /users matches mapper CSV arm", async () => {
-  const res = await fetch(`${base}/users`);
-  expect(res.status).toBe(200);
-  const body = await res.json();
-  const mapperRows = await snapshot("playground/fixtures/users.csv");
-  expect(body).toEqual(rules.csv.normalize(mapperRows));
+describe("app parity (mapper ≟ served)", () => {
+  test("GET /users matches mapper CSV arm", async () => {
+    const res = await fetch(`${base}/users`);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    const mapperRows = await snapshot("playground/fixtures/users.csv");
+    expect(body).toEqual(rules.csv.normalize(mapperRows));
+  });
+
+  test("GET /docs/hello/frontmatter matches mapper MD arm", async () => {
+    const res = await fetch(`${base}/docs/hello/frontmatter`);
+    expect(res.status).toBe(200);
+    const { frontmatter } = (await res.json()) as { frontmatter: unknown };
+    const mapperMd = await snapshot("playground/fixtures/post.md");
+    const normalized = rules.md.normalize(mapperMd) as { frontmatter: unknown };
+    expect(frontmatter).toEqual(normalized.frontmatter);
+  });
+
+  test("GET /docs/hello body text-equals mapper md string", async () => {
+    const res = await fetch(`${base}/docs/hello`);
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    const mapperMd = await snapshot("playground/fixtures/post.md");
+    const normalized = rules.md.normalize(mapperMd) as { md: string };
+    expect(body).toBe(normalized.md);
+  });
 });
 
-test("GET /docs/hello/frontmatter matches mapper MD arm", async () => {
-  const res = await fetch(`${base}/docs/hello/frontmatter`);
-  expect(res.status).toBe(200);
-  const { frontmatter } = (await res.json()) as { frontmatter: unknown };
-  const mapperMd = await snapshot("playground/fixtures/post.md");
-  const normalized = rules.md.normalize(mapperMd) as { frontmatter: unknown };
-  expect(frontmatter).toEqual(normalized.frontmatter);
-});
-
-test("GET /docs/hello body byte-equals mapper md string", async () => {
-  const res = await fetch(`${base}/docs/hello`);
-  expect(res.status).toBe(200);
-  const body = await res.text();
-  const mapperMd = await snapshot("playground/fixtures/post.md");
-  const normalized = rules.md.normalize(mapperMd) as { md: string };
-  expect(body).toBe(normalized.md);
+describe("smoke", () => {
+  test("GET /docs/hello/raw text-equal to on-disk fixture (UTF-8) — rule: none (run-clock smoke)", async () => {
+    const fx = slugToFixture("hello");
+    if (!fx) throw new Error("slugToFixture(hello) missing");
+    const onDisk = await fx.file.text();
+    const res = await fetch(`${base}/docs/hello/raw`);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toBe("text/markdown; charset=utf-8");
+    const body = await res.text();
+    expect(body).toBe(onDisk);
+  });
 });
