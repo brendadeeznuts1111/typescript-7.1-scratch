@@ -10,6 +10,12 @@ export function docFrontmatter(slug: string) {
   return doc.frontmatter;
 }
 
+export function docMarkdownBody(slug: string) {
+  const doc = DOCS[slug];
+  if (!doc) return null;
+  return doc.md;
+}
+
 export async function docBodyStream(slug: string) {
   const doc = DOCS[slug];
   if (!doc) return null;

@@ -50,11 +50,20 @@ test("GET /users matches mapper CSV arm", async () => {
   expect(body).toEqual(rules.csv.normalize(mapperRows));
 });
 
-test("GET /docs/hello frontmatter matches mapper MD arm", async () => {
-  const res = await fetch(`${base}/docs/hello`);
+test("GET /docs/hello/frontmatter matches mapper MD arm", async () => {
+  const res = await fetch(`${base}/docs/hello/frontmatter`);
   expect(res.status).toBe(200);
   const { frontmatter } = (await res.json()) as { frontmatter: unknown };
   const mapperMd = await snapshot("playground/fixtures/post.md");
   const normalized = rules.md.normalize(mapperMd) as { frontmatter: unknown };
   expect(frontmatter).toEqual(normalized.frontmatter);
+});
+
+test("GET /docs/hello body byte-equals mapper md string", async () => {
+  const res = await fetch(`${base}/docs/hello`);
+  expect(res.status).toBe(200);
+  const body = await res.text();
+  const mapperMd = await snapshot("playground/fixtures/post.md");
+  const normalized = rules.md.normalize(mapperMd) as { md: string };
+  expect(body).toBe(normalized.md);
 });

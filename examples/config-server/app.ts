@@ -12,7 +12,8 @@ const server = Bun.serve({
   routes: {
     "/health": handlers.health,
     "/users": handlers.users,
-    "/docs/:slug": (req) => handlers.docs(req.params.slug),
+    "/docs/:slug/frontmatter": (req) => handlers.docsFrontmatter(req.params.slug),
+    "/docs/:slug": (req) => handlers.docsBody(req.params.slug),
   },
 });
 

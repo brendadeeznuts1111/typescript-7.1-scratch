@@ -12,7 +12,10 @@ bun run example:config-server
 curl -s http://127.0.0.1:3100/health
 curl -s http://127.0.0.1:3100/users
 curl -s http://127.0.0.1:3100/docs/hello
+curl -s http://127.0.0.1:3100/docs/hello/frontmatter
 ```
+
+Startup: `app.ts` prints `listening on http://127.0.0.1:<port>` to **stdout** (ephemeral `PORT=0` in app-parity tests). Reuse the same handshake for M2 WebSocket discovery.
 
 `PORT` and `DB_PATH` come from `process.env` after `loadEnvFile` on `playground/fixtures/sample.env`, then fall back to `config.toml`.
 
