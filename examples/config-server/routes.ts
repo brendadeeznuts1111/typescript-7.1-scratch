@@ -1,9 +1,10 @@
 import type { Database } from "bun:sqlite";
 
 import { docFixtureFile, docFrontmatter, slugToFixture } from "./docs.ts";
-import { listUsers } from "./db.ts";
+import { insertUser, listUsers, type UserRow } from "./db.ts";
+import type { LiveHub } from "./live.ts";
 
-export function createHandlers(db: Database) {
+export function createHandlers(db: Database, live: LiveHub) {
   return {
     health(): Response {
       return Response.json({ ok: true });
@@ -11,6 +12,23 @@ export function createHandlers(db: Database) {
 
     users(): Response {
       return Response.json(listUsers(db));
+    },
+
+    async postUser(req: Request): Promise<Response> {
+      let row: UserRow;
+      try {
+        row = (await req.json()) as UserRow;
+      } catch {
+        return new Response("Bad Request", { status: 400 });
+      }
+      if (!row?.name || !row?.email || !row?.zip) {
+        return new Response("Bad Request", { status: 400 });
+      }
+      insertUser(db, row);
+      // Broadcast before response so app-parity tests can assert sequentially:
+      // await wsOpened → register listener → await fetch(POST) → await broadcast.
+      await live.publishAsync({ type: "user.created", user: row });
+      return Response.json(row, { status: 201 });
     },
 
     docsFrontmatter(slug: string): Response {

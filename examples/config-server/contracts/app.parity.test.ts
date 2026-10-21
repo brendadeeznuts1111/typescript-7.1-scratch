@@ -5,6 +5,11 @@ import { slugToFixture } from "../docs.ts";
 import { snapshot } from "../../../contracts/lib/mapper.ts";
 import { REPO_ROOT } from "../../../contracts/lib/paths.ts";
 import { rules } from "../../../contracts/rules.ts";
+import {
+  broadcastWithTimeout,
+  httpBaseToLiveWs,
+  wsOpened,
+} from "./ws-test-helpers.ts";
 
 const APP = join(REPO_ROOT, "examples/config-server/app.ts");
 
@@ -68,6 +73,27 @@ describe("app parity (mapper ≟ served)", () => {
     const mapperMd = await snapshot("playground/fixtures/post.md");
     const normalized = rules.md.normalize(mapperMd) as { md: string };
     expect(body).toBe(normalized.md);
+  });
+});
+
+describe("live", () => {
+  test("POST /users broadcasts user.created on /live", async () => {
+    const ws = new WebSocket(httpBaseToLiveWs(base));
+    await wsOpened(ws);
+
+    const pendingBroadcast = broadcastWithTimeout(ws, 500);
+    const row = { name: "Test User", email: "test@example.com", zip: "99999" };
+    const res = await fetch(`${base}/users`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(row),
+    });
+    expect(res.status).toBe(201);
+    expect(await res.json()).toEqual(row);
+
+    const msg = await pendingBroadcast;
+    expect(msg).toEqual({ type: "user.created", user: row });
+    ws.close();
   });
 });
 

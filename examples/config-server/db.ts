@@ -20,10 +20,21 @@ export function openDatabase(dbPath: string): Database {
   return db;
 }
 
+export type UserRow = {
+  name: string;
+  email: string;
+  zip: string;
+};
+
 export function listUsers(db: Database) {
-  return db.query("SELECT name, email, zip FROM users ORDER BY name").all() as {
-    name: string;
-    email: string;
-    zip: string;
-  }[];
+  return db.query("SELECT name, email, zip FROM users ORDER BY name").all() as UserRow[];
+}
+
+export function insertUser(db: Database, row: UserRow): UserRow {
+  db.prepare("INSERT INTO users (name, email, zip) VALUES ($name, $email, $zip)").run({
+    $name: row.name,
+    $email: row.email,
+    $zip: row.zip,
+  });
+  return row;
 }

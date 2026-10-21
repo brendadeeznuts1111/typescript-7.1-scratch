@@ -11,7 +11,7 @@ Cross-cutting invariants (all milestones):
 ## M2 — Live surface
 
 - [x] **`GET /docs/:slug/raw`** — `new Response(Bun.file(fixturePath))`; byte-equal smoke test (`rule: none, run-clock smoke`). Slug → path via `slugToFixture` only.
-- [ ] **`POST /users`** — SQLite insert → `Bun.serve` WS broadcast on `/live`. WS upgrade via threaded `server` ref in `fetch`.
+- [x] **`POST /users`** — SQLite insert → publish → response; WS `/live` via `fetch` + `server.upgrade`.
 - [ ] **Redis arm (conditional)** — `REDIS_URL` unset → skip; set → invalidate cache key on POST. No new fixture, no new rule.
 - [ ] **WS roundtrip test** — connect → POST → assert broadcast received → assert cache key state. Design for the POST-response / WS-delivery race explicitly.
 - [ ] **WS handshake** — reuse `readStartupUrl`; derive `ws://host:port/live`.

@@ -1,20 +1,49 @@
 import { loadRuntimeConfig } from "./config.ts";
 import { openDatabase } from "./db.ts";
+import { createLiveHub } from "./live.ts";
 import { createHandlers } from "./routes.ts";
 
 const { port, dbPath } = loadRuntimeConfig();
 const db = openDatabase(dbPath);
-const handlers = createHandlers(db);
+const live = createLiveHub();
+const handlers = createHandlers(db, live);
 
 const server = Bun.serve({
   hostname: "127.0.0.1",
   port: Number.isFinite(port) ? port : 3100,
-  routes: {
-    "/health": handlers.health,
-    "/users": handlers.users,
-    "/docs/:slug/frontmatter": (req) => handlers.docsFrontmatter(req.params.slug),
-    "/docs/:slug/raw": (req) => handlers.docsRaw(req.params.slug),
-    "/docs/:slug": (req) => handlers.docsBody(req.params.slug),
+  fetch(req, srv) {
+    const url = new URL(req.url);
+
+    if (url.pathname === "/live") {
+      if (srv.upgrade(req)) return;
+      return new Response("Expected WebSocket", { status: 426 });
+    }
+
+    if (url.pathname === "/health" && req.method === "GET") return handlers.health();
+    if (url.pathname === "/users" && req.method === "GET") return handlers.users();
+    if (url.pathname === "/users" && req.method === "POST") return handlers.postUser(req);
+
+    const frontmatter = /^\/docs\/([^/]+)\/frontmatter$/.exec(url.pathname);
+    if (frontmatter && req.method === "GET") return handlers.docsFrontmatter(frontmatter[1]!);
+
+    const raw = /^\/docs\/([^/]+)\/raw$/.exec(url.pathname);
+    if (raw && req.method === "GET") return handlers.docsRaw(raw[1]!);
+
+    const doc = /^\/docs\/([^/]+)$/.exec(url.pathname);
+    if (doc && req.method === "GET") return handlers.docsBody(doc[1]!);
+
+    return new Response("Not Found", { status: 404 });
+  },
+  websocket: {
+    open(ws) {
+      live.add(ws);
+    },
+    message(_ws, _message) {
+      // clients are receive-only for server broadcasts
+    },
+    close(ws) {
+      live.remove(ws);
+    },
   },
 });
 
