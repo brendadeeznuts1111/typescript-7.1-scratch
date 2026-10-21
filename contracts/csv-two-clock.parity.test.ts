@@ -9,6 +9,9 @@ const FIXTURE = "playground/fixtures/users.csv";
 const PARSER = "csv-parse/sync";
 const normalize = rules.csv.normalize;
 
+// csv-parse/sync with { columns: true, bom: true, skip_empty_lines: true }
+// returns Array<Record<string, string>> — same shape as motherload, no adapter needed.
+
 function assertAllColumnsAreStrings(rows: unknown): asserts rows is Record<string, string>[] {
   expect(Array.isArray(rows)).toBe(true);
   for (const row of rows as Record<string, unknown>[]) {

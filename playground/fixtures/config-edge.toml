@@ -1,0 +1,9 @@
+# Two-clock TOML surface (not consumed by config-server runtime).
+threshold = 1_000
+ratio = 0.5
+debug = true
+started = 1979-05-27T07:32:00Z
+day = 1979-05-27
+
+[server]
+host = "localhost"
