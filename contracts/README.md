@@ -10,8 +10,10 @@ The test parent process is never preloaded. Mapper snapshots are cached per `(pa
 ## Run
 
 ```bash
-bun test contracts
+bun run test:contracts
 ```
+
+Includes root file-parity tests and `examples/config-server/contracts` app-level parity.
 
 Wired into `bun run ci:local` after playground typecheck. Validated against **[motherload v0.1.0](https://github.com/colinhacks/motherload/releases/tag/v0.1.0)** and **`typescript@beta`** (`7.1.0-beta` in the lockfile), same as `package.json`. Confirm with `npm view typescript@beta version` before bumping the exact `typescript` string in `package.json`; re-run `bun run ci:local` after any compiler or motherload pin change.
 

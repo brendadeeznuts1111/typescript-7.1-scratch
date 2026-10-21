@@ -1,7 +1,10 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
 
 import { FIXTURE_CASES } from "./manifest.ts";
-import { RULE_ENTRIES } from "./rules.ts";
+import { RULE_ENTRIES, ruleForPath } from "./rules.ts";
+import { REPO_ROOT } from "./lib/paths.ts";
 import { runParityCase } from "./lib/run-case.ts";
 
 describe("rules manifest", () => {
@@ -9,6 +12,14 @@ describe("rules manifest", () => {
     for (const [id, rule] of RULE_ENTRIES) {
       expect(typeof rule.normalize).toBe("function");
       expect(rule.format).toBe(id);
+    }
+  });
+
+  test("every playground fixture maps to a FormatId rule", () => {
+    const dir = join(REPO_ROOT, "playground/fixtures");
+    for (const name of readdirSync(dir)) {
+      const rule = ruleForPath(name);
+      expect(rule).toBeDefined();
     }
   });
 });

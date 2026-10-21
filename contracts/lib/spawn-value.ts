@@ -1,11 +1,10 @@
 import { join } from "node:path";
 
 import type { FixtureCase } from "../manifest.ts";
+import { snapshot } from "./mapper.ts";
 import { wireParse } from "./json-wire.ts";
 import { REPO_ROOT } from "./paths.ts";
-import { cacheKey, getCached, setCached } from "./mapper-cache.ts";
 
-const MAPPER_CHILD = join(REPO_ROOT, "contracts/bin/mapper-value-child.ts");
 const RUNTIME_CHILD = join(REPO_ROOT, "contracts/bin/runtime-import-child.ts");
 
 async function runChild(cmd: string[], absPath: string): Promise<unknown> {
@@ -26,14 +25,9 @@ async function runChild(cmd: string[], absPath: string): Promise<unknown> {
   return wireParse(stdout);
 }
 
-/** Codegen/mapper arm via plugin.load in a fresh Bun child (no preload). */
-export async function mapperCodegenSnapshot(c: FixtureCase, absPath: string): Promise<unknown> {
-  const key = cacheKey(c, absPath);
-  const hit = getCached(key);
-  if (hit !== undefined) return hit;
-  const value = await runChild(["bun", MAPPER_CHILD], absPath);
-  setCached(key, value);
-  return value;
+/** Codegen/mapper arm via {@link snapshot}. */
+export async function mapperCodegenSnapshot(c: FixtureCase, _absPath: string): Promise<unknown> {
+  return snapshot(c.path, c.importKind);
 }
 
 /** Runtime arm via motherload/register in a fresh Bun child. */

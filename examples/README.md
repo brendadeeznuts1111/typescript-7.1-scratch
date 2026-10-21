@@ -1,5 +1,14 @@
 # Examples
 
+## Typed cross-domain runtime (M1)
+
+[config-server](./config-server/) — TOML + `.env`, CSV → SQLite, Markdown + `Bun.file`, `Bun.serve`. App-level parity tests under `config-server/contracts/`.
+
+| Command | Script |
+|---------|--------|
+| Typecheck | `bun run typecheck:config-server` |
+| Run | `bun run example:config-server` |
+
 ## IntelliSense (one format each)
 
 | Format | Folder | Typecheck |
