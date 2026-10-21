@@ -3,6 +3,10 @@
   "description": "Layered Bun playground for TypeScript 7.1 content mappers and motherload",
   "version": "0.0.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brendadeeznuts1111/typescript-7.1-scratch.git"
+  },
   "module": "index.ts",
   "type": "module",
   "private": true,

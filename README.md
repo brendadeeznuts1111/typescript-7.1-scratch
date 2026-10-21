@@ -1,5 +1,7 @@
 # TypeScript 7.1 scratch
 
+[![CI](https://github.com/brendadeeznuts1111/typescript-7.1-scratch/actions/workflows/ci.yml/badge.svg)](https://github.com/brendadeeznuts1111/typescript-7.1-scratch/actions/workflows/ci.yml)
+
 Playground for [TypeScript 7.1 content mappers](https://devblogs.microsoft.com/typescript/announcing-typescript-7-1-beta/) and [motherload](https://github.com/colinhacks/motherload) — the pattern [@colinhacks](https://x.com/colinhacks/status/2112954197373259850) demoed with typed Markdown frontmatter imports.
 
 Requires [Bun](https://bun.com) and TypeScript 7.1 beta. MIT licensed — see [LICENSE](./LICENSE).
