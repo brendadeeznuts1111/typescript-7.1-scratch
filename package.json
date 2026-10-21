@@ -1,0 +1,22 @@
+{
+  "name": "typescript-7.1-scratch",
+  "description": "Layered Bun playground for TypeScript 7.1 content mappers and motherload",
+  "version": "0.0.0",
+  "license": "MIT",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "typecheck": "bun check",
+    "typecheck:playground": "tsc -p playground --noEmit --runExternalCode",
+    "playground": "bun --preload motherload/register playground/main.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "motherload": "^0.1.0",
+    "typescript": "^7.1.0-beta"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  }
+}
