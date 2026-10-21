@@ -15,7 +15,7 @@
     "typecheck:playground": "tsc -p playground --noEmit --runExternalCode",
     "playground": "bun --preload motherload/register playground/main.ts",
     "test:contracts": "bun test contracts",
-    "ci:local": "bun ci && bun run typecheck:playground && bun run playground && bun run test:contracts",
+    "ci:local": "bun install --frozen-lockfile && bun run typecheck:playground && bun run playground && bun run test:contracts",
     "typecheck:example": "tsc -p examples/intellisense-markdown --noEmit --runExternalCode",
     "example:intellisense": "bun --preload motherload/register examples/intellisense-markdown/main.ts",
     "typecheck:example-toml": "tsc -p examples/intellisense-toml --noEmit --runExternalCode",

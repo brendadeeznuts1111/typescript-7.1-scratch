@@ -1,146 +1,134 @@
-/** Stable IDs — referenced in test output, CI artifacts, and Layer 08 docs */
-export type ExceptionId =
-  | "none"
-  | "plain-json-type-clock-widened"
-  | "env-side-effect-no-process-env"
-  | "app-level-sql-redis";
+import {
+  envKeySetOnly,
+  identity,
+  mdShapeKeySort,
+  sortKeysAndUnwrapReadonly,
+} from "./lib/normalizers.ts";
 
 export type ImportKind = "default" | "attribute-json" | "attribute-text";
 
-export type FormatId = "csv" | "tsv" | "toml" | "yaml" | "jsonc" | "json5" | "md" | "txt" | "json-plain" | "env";
+export type FormatId =
+  | "csv"
+  | "tsv"
+  | "toml"
+  | "yaml"
+  | "jsonc"
+  | "json5"
+  | "md"
+  | "txt"
+  | "json"
+  | "env";
 
-export type NormalizeStep =
-  | "identity"
-  | "sortKeysDeep"
-  | "dropUndefinedDeep"
-  | "numberNormalize"
-  | "mdShape"
-  | "envFixtureKeysOnly";
+export type ExceptionApplies = "types-only" | "runtime-only" | "env-side-effect";
 
-export type FormatRule = {
+export type NormalizeRule = {
   format: FormatId;
   extensions: readonly `.${string}`[];
   importKinds: readonly ImportKind[];
-  normalize: {
-    mapper: readonly NormalizeStep[];
-    runtime: readonly NormalizeStep[];
+  /** Applied to mapper and runtime arms before compare */
+  normalize: (value: unknown) => unknown;
+  exception?: {
+    reason: string;
+    applies: ExceptionApplies;
   };
-  exception: ExceptionId;
-  rationale: string;
+  /** When false, harness skips file parity (see exception) */
   fileParity: boolean;
 };
 
-export const FORMAT_RULES: readonly FormatRule[] = [
-  {
+export const rules: Record<FormatId, NormalizeRule> = {
+  csv: {
     format: "csv",
     extensions: [".csv"],
     importKinds: ["default"],
-    normalize: { mapper: ["identity"], runtime: ["identity"] },
-    exception: "none",
-    rationale: "Cells are strings both sides.",
+    normalize: identity,
     fileParity: true,
   },
-  {
+  tsv: {
     format: "tsv",
     extensions: [".tsv"],
     importKinds: ["default"],
-    normalize: { mapper: ["identity"], runtime: ["identity"] },
-    exception: "none",
-    rationale: "",
+    normalize: identity,
     fileParity: true,
   },
-  {
+  toml: {
     format: "toml",
     extensions: [".toml"],
     importKinds: ["default"],
-    normalize: {
-      mapper: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-      runtime: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-    },
-    exception: "none",
-    rationale: "Mutable vs readonly is type-only; value shape must match.",
+    normalize: sortKeysAndUnwrapReadonly,
     fileParity: true,
   },
-  {
+  yaml: {
     format: "yaml",
     extensions: [".yaml", ".yml"],
     importKinds: ["default"],
-    normalize: {
-      mapper: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-      runtime: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-    },
-    exception: "none",
-    rationale: "",
+    normalize: sortKeysAndUnwrapReadonly,
     fileParity: true,
   },
-  {
+  jsonc: {
     format: "jsonc",
     extensions: [".jsonc"],
     importKinds: ["default"],
-    normalize: {
-      mapper: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-      runtime: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-    },
-    exception: "none",
-    rationale: "",
+    normalize: sortKeysAndUnwrapReadonly,
     fileParity: true,
   },
-  {
+  json5: {
     format: "json5",
     extensions: [".json5"],
     importKinds: ["default"],
-    normalize: {
-      mapper: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-      runtime: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-    },
-    exception: "none",
-    rationale: "",
+    normalize: sortKeysAndUnwrapReadonly,
     fileParity: true,
   },
-  {
+  md: {
     format: "md",
     extensions: [".md"],
     importKinds: ["default"],
-    normalize: { mapper: ["mdShape"], runtime: ["mdShape"] },
-    exception: "none",
-    rationale: "md byte-equal; frontmatter key-sorted.",
+    normalize: mdShapeKeySort,
     fileParity: true,
   },
-  {
+  txt: {
     format: "txt",
     extensions: [".txt"],
     importKinds: ["default"],
-    normalize: { mapper: ["identity"], runtime: ["identity"] },
-    exception: "none",
-    rationale: "",
+    normalize: identity,
     fileParity: true,
   },
-  {
-    format: "json-plain",
+  json: {
+    format: "json",
     extensions: [".json"],
     importKinds: ["attribute-json"],
-    normalize: {
-      mapper: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-      runtime: ["sortKeysDeep", "dropUndefinedDeep", "numberNormalize"],
-    },
-    exception: "plain-json-type-clock-widened",
-    rationale: "Type clock may widen; contract is runtime shape only.",
+    normalize: sortKeysAndUnwrapReadonly,
     fileParity: true,
+    exception: {
+      reason:
+        "motherload emits as-const literals; Bun `with { type: \"json\" }` widens — runtime shape parity only",
+      applies: "types-only",
+    },
   },
-  {
+  env: {
     format: "env",
     extensions: [".env"],
     importKinds: ["default"],
-    normalize: { mapper: ["envFixtureKeysOnly"], runtime: ["envFixtureKeysOnly"] },
-    exception: "env-side-effect-no-process-env",
-    rationale: "Compare parsed fixture; loadEnvFile is separate app contract.",
+    normalize: envKeySetOnly,
     fileParity: false,
+    exception: {
+      reason: "loadEnvFile is side-effecting; assert keys from fixture, not values from process.env",
+      applies: "env-side-effect",
+    },
   },
-];
+};
 
-export function ruleForPath(path: string): FormatRule | undefined {
+export const RULE_ENTRIES = Object.entries(rules) as [FormatId, NormalizeRule][];
+
+export function ruleForPath(path: string): NormalizeRule | undefined {
   const dot = path.lastIndexOf(".");
   if (dot === -1) return undefined;
   const ext = path.slice(dot) as `.${string}`;
-  return FORMAT_RULES.find((r) => r.extensions.includes(ext));
+  return RULE_ENTRIES.find(([, rule]) => rule.extensions.includes(ext))?.[1];
+}
+
+export function receiptForRule(rule: NormalizeRule): string {
+  if (rule.exception) {
+    return `${rule.format} · exception (${rule.exception.applies}): ${rule.exception.reason}`;
+  }
+  return `${rule.format} · no documented exception — mapper and runtime must match after normalize`;
 }

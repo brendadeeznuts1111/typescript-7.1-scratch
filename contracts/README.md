@@ -17,4 +17,8 @@ Wired into `bun run ci:local` after playground typecheck. Validated against **[m
 
 ## Rules
 
-See [`rules.ts`](./rules.ts) for per-format normalizers and documented exceptions. Cases are listed in [`manifest.ts`](./manifest.ts) (M1: csv, tsv, toml).
+Per-format **`normalize`** functions and **`exception.reason`** receipts live in [`rules.ts`](./rules.ts) (`Record<FormatId, NormalizeRule>`). The harness applies the same normalizer to both arms; pass/fail output cites `receiptForRule`. Cases are in [`manifest.ts`](./manifest.ts) (M1: csv, tsv, toml).
+
+## CI lockfile
+
+Root `ci:local` starts with `bun install --frozen-lockfile` so `typescript@beta` / `motherload` pins cannot drift without an explicit lock refresh.

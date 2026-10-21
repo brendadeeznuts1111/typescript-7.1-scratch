@@ -1,5 +1,3 @@
-import type { FormatId, NormalizeStep } from "../rules.ts";
-
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (value === null || typeof value !== "object") return false;
   const proto = Object.getPrototypeOf(value);
@@ -46,7 +44,16 @@ function numberNormalize(value: unknown): unknown {
   return out;
 }
 
-function mdShape(value: unknown): unknown {
+export function identity(value: unknown): unknown {
+  return value;
+}
+
+/** Mutable vs readonly is type-only; compare sorted key shape and numbers. */
+export function sortKeysAndUnwrapReadonly(value: unknown): unknown {
+  return numberNormalize(dropUndefinedDeep(sortKeysDeep(value)));
+}
+
+export function mdShapeKeySort(value: unknown): unknown {
   if (!isPlainObject(value) || typeof value.md !== "string" || !isPlainObject(value.frontmatter)) {
     return value;
   }
@@ -56,32 +63,7 @@ function mdShape(value: unknown): unknown {
   };
 }
 
-/** Env arm compares parsed key/value map from fixture text, not process.env. */
-function envFixtureKeysOnly(value: unknown): unknown {
+/** Parsed fixture keys/values only — not process.env after loadEnvFile. */
+export function envKeySetOnly(value: unknown): unknown {
   return value;
-}
-
-const STEP_FNS: Record<NormalizeStep, (v: unknown) => unknown> = {
-  identity: (v) => v,
-  sortKeysDeep,
-  dropUndefinedDeep,
-  numberNormalize,
-  mdShape,
-  envFixtureKeysOnly,
-};
-
-export function applyNormalizeSteps(value: unknown, steps: readonly NormalizeStep[]): unknown {
-  let out = value;
-  for (const step of steps) {
-    out = STEP_FNS[step](out);
-  }
-  return out;
-}
-
-export function normalizeForCompare(
-  value: unknown,
-  steps: readonly NormalizeStep[],
-  _format: FormatId,
-): unknown {
-  return applyNormalizeSteps(value, steps);
 }
