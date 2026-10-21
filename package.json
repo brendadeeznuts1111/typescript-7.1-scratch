@@ -14,7 +14,13 @@
     "typecheck": "bun check",
     "typecheck:playground": "tsc -p playground --noEmit --runExternalCode",
     "playground": "bun --preload motherload/register playground/main.ts",
-    "ci:local": "bun ci && bun run typecheck:playground && bun run playground"
+    "ci:local": "bun ci && bun run typecheck:playground && bun run playground",
+    "typecheck:example": "tsc -p examples/intellisense-markdown --noEmit --runExternalCode",
+    "example:intellisense": "bun --preload motherload/register examples/intellisense-markdown/main.ts",
+    "typecheck:example-toml": "tsc -p examples/intellisense-toml --noEmit --runExternalCode",
+    "example:toml": "bun --preload motherload/register examples/intellisense-toml/main.ts",
+    "typecheck:example-csv": "tsc -p examples/intellisense-csv --noEmit --runExternalCode",
+    "example:csv": "bun --preload motherload/register examples/intellisense-csv/main.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

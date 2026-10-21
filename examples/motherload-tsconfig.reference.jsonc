@@ -1,0 +1,37 @@
+{
+  // Canonical contentMappers block (motherload docs / demo screenshots).
+  // Copy into your tsconfig.json or tsconfig.jsonc.
+  //
+  // Typecheck: tsc --noEmit --runExternalCode
+  // Runtime (Bun): bun --preload motherload/register main.ts
+  //
+  // Note: .schema.jsonc / .schema.json5 are often wired via the dotschema
+  // package (see motherload README). motherload 0.1.0 on npm covers the
+  // other extensions below; add a second contentMappers entry for dotschema
+  // when you import JSON Schema files.
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true
+  },
+  "contentMappers": [
+    {
+      "package": "motherload",
+      "extensions": [
+        ".toml",
+        ".yaml",
+        ".yml",
+        ".json5",
+        ".jsonc",
+        ".env",
+        ".csv",
+        ".tsv",
+        ".txt",
+        ".md",
+        ".schema.jsonc"
+      ]
+    }
+  ]
+}

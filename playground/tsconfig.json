@@ -15,7 +15,18 @@
   "contentMappers": [
     {
       "package": "motherload",
-      "extensions": [".toml", ".yaml", ".yml", ".jsonc", ".json5", ".env", ".csv", ".tsv", ".txt", ".md"]
+      "extensions": [
+        ".toml",
+        ".yaml",
+        ".yml",
+        ".json5",
+        ".jsonc",
+        ".env",
+        ".csv",
+        ".tsv",
+        ".txt",
+        ".md"
+      ]
     }
   ],
   "include": ["main.ts", "layers/**/*.ts", "lib/**/*.ts"]

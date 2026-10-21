@@ -1,0 +1,7 @@
+[free]
+price = 0
+seats = 1
+
+[pro]
+price = 12
+seats = 10
