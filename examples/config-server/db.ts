@@ -3,7 +3,8 @@ import { Database } from "bun:sqlite";
 import users from "../../playground/fixtures/users.csv";
 
 export function openDatabase(dbPath: string): Database {
-  const db = new Database(dbPath);
+  const path = dbPath.trim() === "" ? ":memory:" : dbPath;
+  const db = new Database(path);
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       name TEXT NOT NULL,
