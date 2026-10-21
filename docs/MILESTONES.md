@@ -40,7 +40,7 @@ Cross-cutting invariants (all milestones):
 
 **Scope guard:** normalizer rules stay data-driven; no ad-hoc `switch (format)` reintroduced.
 
-**Fixture ownership:** `playground/fixtures/users.csv` is shared by config-server seed and layer 05 curriculum; column or row-shape changes affect both paths.
+**Fixture ownership:** `users.csv` is co-owned by layer 05 (curriculum) and `db.ts` (app seed). Adding a column for one consumer changes the other. If they diverge, split into `users.csv` (curriculum) + `users.app.csv` (seed) rather than branching the fixture.
 
 ## M4 — Hardening
 

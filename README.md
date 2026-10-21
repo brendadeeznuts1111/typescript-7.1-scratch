@@ -8,6 +8,8 @@ Thread: [@colinhacks on content mappers](https://x.com/colinhacks/status/2112954
 
 Requires [Bun](https://bun.com) and TypeScript **7.1 beta** (npm tag **`beta`**, not `next`). MIT licensed — see [LICENSE](./LICENSE).
 
+Architecture and contract surface: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+
 ## Setup
 
 Pins match [motherload v0.1.0](https://github.com/colinhacks/motherload/releases/tag/v0.1.0): **`motherload@0.1.0`** and **`typescript@beta`** (exact `7.1.0-beta` in `package.json` — verify with `npm view typescript@beta version` before changing). Do not use `typescript@next`; the `next` tag can move past the 7.1 beta that documents `contentMappers` and `--runExternalCode`.
