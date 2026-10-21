@@ -13,7 +13,8 @@
   "scripts": {
     "typecheck": "bun check",
     "typecheck:playground": "tsc -p playground --noEmit --runExternalCode",
-    "playground": "bun --preload motherload/register playground/main.ts"
+    "playground": "bun --preload motherload/register playground/main.ts",
+    "ci:local": "bun ci && bun run typecheck:playground && bun run playground"
   },
   "devDependencies": {
     "@types/bun": "latest",
